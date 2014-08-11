@@ -1,0 +1,59 @@
+== 这个package的注解 ==============================================================================================  
+ 
+ 1. 程序的入口是LDAClient.java.
+    	里面主要分3步： stemmer（http://tartarus.org/~martin/PorterStemmer/java.txt）, data preparation, generate LDA模型
+ 		（最新的版本里，因为使用了Lucene的stemmer,并且嵌入在了data preparation中，所以stemmer就没有用了）
+ 		
+ 2. Constants.java类里能看到 data preparation的输入输出
+ 
+ 
+ 
+== JGibbDLA工具的解释 ============================================================================================== 
+ http://jgibblda.sourceforge.net/
+ 
+ 1.#-est 此参数初次训练LDA模型;
+ 2.#-estc:此参数用于从已有的模型当中训练LDA模型;
+ 3.#-inf: 此参数用于对新的文档进行测试;
+ 4.#-model <string>: 已有的模型的名称;
+
+ 5.#-alpha<double>:α超参数，默认是50/K，K为主题数量;
+ 6.#-beta <double>: β超参数，默认为0.1;
+ 7.#-ntopics <int>: 主题数量，默认100;
+ 8.#-niters <int>: Gibbs抽样迭代次数，默认为2000;
+ 9.#-savestep <int>: 保持模型的迭代次数，即每迭代多少次将保持一次结果模型。默认为200;
+ 10.# -twords <int>: 每个主题最可能的单车数量。默认为0，如果设定大于0，比如20，JGibbLDA将会根据此参数在每次保持模型时为每个主题打印出最可能的20个词;
+
+ 11.#-dir <string>: 输入词集文件夹目录;此目录也是模型结果输出目录
+ 12.# -dfile <string>: 输入词集文件名称
+ 
+·         <model_name>.phi: Each line is a topic, each column is a word in the vocabulary
+·         <model_name>.theta: Each line is a document and each column is a topic.
+·         <model_name>.tassign: Each line is a document that consists of a list of <wordij>:<topic of wordij>
+·         <model_file>.twords: This file contains twords most likely words of each topic. twords is specified in the command.
+
+===== Corpus File Name 的读取 =====================================================================
+
+程序读取corpus file的顺序是： 这样的方式。 这样的方式和我们在文件夹下看到的顺序是不一样的！！但是这样的方式每次读取文件的顺序是稳定的。(还应该进一步测试不同操作系统，返回文件的顺序如何)
+
+File dir = new File(dataFiles);
+		File[] files = dir.listFiles();
+		
+		for (int i = 0; i < files.length; i++) {
+			if (!files[i].isHidden()) {
+				String add = files[i].getName();
+				System.out.println(add);
+				
+			}
+		}
+
+* 程序第一个涉及到 corpus file 的地方是 LDADataPreparation。java生成newdocs.dat。按照顺序File[] files = dir.listFiles();
+
+* 程序第二个涉及到corpus file的地方是 。tassign矩阵 和 .theat矩阵。
+
+      已经验证，.tassign的文件顺序和newdocs.dat的顺序是一致的。
+      可以相信，.tassign和.theta的文件顺序也是一致的。
+      ==》 所以， 根据读.theta的循环变量i，来确定文件名是对的！！
+
+====== Phi里的word和wordmap.txt里的对应 =============================================================================== 
+
+1. phi里 每一列 是一个word。 第一列word在wordmap.txt中编号为0， 第二列word在wordmap.txt中编号为1 etc。。。

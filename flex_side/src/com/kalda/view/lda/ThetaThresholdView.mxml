@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import com.kalda.command.LDATopicManager.LDATopicManagerControl;
+			import com.kalda.dto.ldaanalysis.ThetaThreshold;
+			import com.kalda.model.Models;
+			import com.kalda.util.StringUtils;
+			
+			import mx.controls.Alert;
+			import mx.events.ListEvent;
+			import mx.core.FlexGlobals;
+			import mx.managers.PopUpManager;
+			
+			private function loadTheta():void {
+				if (Models.ldaModel.twordsDisplayFormat1.length == 0) {
+					Alert.show("Please Load an LDA run first !");
+					return;
+				}
+				
+				var tt:ThetaThreshold = new ThetaThreshold();
+				tt.ldaRunDocName = Models.ldaModel.ldaRunDocName;
+				tt.total = t1.selected;
+				tt.percentile = t2.selected;
+				if (tt.percentile) {
+					tt.percentNum = StringUtils.StringToNumber(i1.text);
+				}
+				tt.deviation = t3.selected;
+				if (tt.deviation) {
+					tt.kValue = StringUtils.StringToint(i2.text);
+				}
+				
+				// can be deleted
+				if (tt.total == true) {
+					tt.total = false;
+					tt.deviation = true;
+					tt.kValue = 0;
+				}
+				//
+				
+				Models.ldaModel.thetaThreshold = tt;
+				// do below two remote object calls in one click...
+				LDATopicManagerControl.loadThetaWithThreshold();
+				LDATopicManagerControl.topicCorrespondHowManyDocumentWithThetaThresholdCommand();
+			}
+			
+			private function loadDocList(event:ListEvent):void {
+				var topicNum:int = event.target.selectedItem.topicNum;
+				Models.ldaModel.topicNum = topicNum;
+				//LDATopicManagerControl.topicCorrespondDocListWithThetaThresholdCommand();
+				
+				var win : DocListWithThetaThresholdWindow = new DocListWithThetaThresholdWindow();
+				PopUpManager.addPopUp(win, Sprite(FlexGlobals.topLevelApplication), true);
+				PopUpManager.centerPopUp(win);
+			}
+		]]>
+	</fx:Script>
+	
+	<mx:VBox height="100%" width="100%">
+		<mx:HBox width="100%">
+			<mx:Label text="Choose Theta Matrix Loading Threshold :"/>		
+			<mx:VBox borderVisible="true" dropShadowVisible="true" borderColor="#2F5DC6" fontFamily="Arial" fontStyle="italic">
+				<mx:RadioButton groupName="thetathreashold" id="t1" label="High Probability Docs" color="0x323232" enabled="true"/> 
+				<mx:HBox>
+					<mx:RadioButton groupName="thetathreashold" id="t2" label="Percentile" color="0x323232" enabled="true" />
+					<mx:HBox id="percent" enabled="true">
+						<mx:Label text="Top"/>
+						<mx:TextInput id="i1" width="30" enabled="true"/>
+						<mx:Label text="%"/>
+					</mx:HBox>
+				</mx:HBox>
+				<mx:HBox>
+					<mx:RadioButton groupName="thetathreashold" id="t3" label="Mean Deviation" color="0x323232" selected="true" />
+					<mx:HBox id="kvalue" enabled="true" visible="true">
+						<mx:Label text="Key value"/>
+						<mx:TextInput id="i2" width="30"/>	
+					</mx:HBox>
+				</mx:HBox>
+			</mx:VBox>
+			<mx:Button label="Load Theta" click="loadTheta()" />
+			<mx:Text text="{Models.ldaModel.thetaThreshold.note}" width="100%" height="100%"/>
+		</mx:HBox>
+		
+		<mx:DataGrid dataProvider="{Models.ldaModel.topicCorrespondDocAmount}" width="100%" height="100%" 
+					 doubleClickEnabled="true" itemDoubleClick="loadDocList(event)" editable="false">
+			<mx:columns>
+				<mx:DataGridColumn headerText="Topics" dataField="topicString"/>
+				<mx:DataGridColumn headerText="Doc Amount" dataField="corpusDocAmount" width="100"/>
+			</mx:columns>
+		</mx:DataGrid>
+		
+	</mx:VBox>
+	
+</mx:Canvas>

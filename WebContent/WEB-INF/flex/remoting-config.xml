@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<service id="remoting-service" 
+    class="flex.messaging.services.RemotingService" 
+    messageTypes="flex.messaging.messages.RemotingMessage">
+
+    <adapters>
+        <adapter-definition id="java-object" class="flex.messaging.services.remoting.adapters.JavaAdapter" default="true"/>
+    </adapters>
+
+    <default-channels>
+        <channel ref="yxkalda-secure-amf"/>
+        <channel ref="yxkalda-amf"/>
+    </default-channels>
+    
+	<destination id="CorpusMgrServices">
+  			 <properties>
+  			   <factory>spring</factory>
+  			   <source>CorpusMgrBO</source>
+  			 </properties>
+    </destination>
+    
+    <destination id="LDATopicManagerServices">
+  			 <properties>
+  			   <factory>spring</factory>
+  			   <source>LDATopicMgrBO</source>
+  			 </properties>
+    </destination>
+
+</service>

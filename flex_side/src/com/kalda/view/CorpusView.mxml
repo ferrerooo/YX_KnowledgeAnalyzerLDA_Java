@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Panel xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%"
+		   title="Current LDA Model :  {Models.ldaModel.ldaRunDocName}" initialize="init()">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<!-- Script ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<fx:Script>
+		<![CDATA[
+			import com.kalda.command.CorpusMgr.CorpusMgrControl;
+			import com.kalda.command.KnowledgeAnalyzerLDAController;
+			import com.kalda.command.LDATopicManager.LDATopicManagerControl;
+			import com.kalda.dto.ldaanalysis.CorpusTransferObject;
+			import com.kalda.dto.ldaanalysis.ThetaThreshold;
+			import com.kalda.model.Models;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.collections.ArrayCollection;
+			import mx.events.ListEvent;
+			import com.kalda.view.corpus.CorpusViewThreadWindow;
+			import mx.managers.PopUpManager;
+			
+			private function init():void {
+				Models.ldaModel.corpusTransferObject.corpusDocContent = "";
+				Models.ldaModel.topicCorrespondDocList = null;
+			}
+			
+			private function changekeywords():void {
+				if (t1.selected) {
+					kw.dataField = "topWords";
+					kw.dataTipField = "topWords";
+				}
+				if (t2.selected) {
+					kw.dataField = "selectedWords";
+					kw.dataTipField = "selectedWords";
+				}
+			}
+			
+			private function train():void {
+				Models.corpusModel.newCorpus = newCorpus.text;
+				CorpusMgrControl.trainNewCorpus();
+			}
+			
+			private function loadDocList(event:ListEvent):void {
+				var topicNum:int = event.target.selectedItem.topicNum;
+				Models.ldaModel.topicNum = topicNum;
+				Models.ldaModel.topicCorrespondDocList = new ArrayCollection();
+				var thetaThreshold:ThetaThreshold = new ThetaThreshold();
+				thetaThreshold.deviation = true;
+				thetaThreshold.deviationValue = 0.08;
+				thetaThreshold.ldaRunDocName = Models.ldaModel.ldaRunDocName;
+				Models.ldaModel.thetaThreshold = thetaThreshold;
+				LDATopicManagerControl.topicCorrespondDocListWithThetaThresholdCommand();
+			}
+			
+			private function loadDoc(event:ListEvent):void {
+				var ct:CorpusTransferObject = new CorpusTransferObject();
+				ct.corpusDocName = event.target.selectedItem.docName as String;
+				Models.ldaModel.corpusTransferObject = ct;
+				LDATopicManagerControl.loadCorpusDocument();
+			}
+			
+			private function loadWebPage():void {
+				var name:String = Models.ldaModel.corpusTransferObject.corpusDocName;
+				
+				if (name.indexOf("-") >= 0) {
+					
+					var win : CorpusViewThreadWindow = new CorpusViewThreadWindow();
+					PopUpManager.addPopUp(win, Sprite(FlexGlobals.topLevelApplication), true);
+					PopUpManager.centerPopUp(win);
+					
+					CorpusMgrControl.loadThreadurl();
+					
+				} else {
+					Alert.show("The corpus file is already a Thread!");
+				}
+			}
+	
+		]]>
+	</fx:Script>
+	
+	<!-- UI components ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	
+	<mx:HBox height="100%" width="100%">
+		
+		<mx:VBox height="100%" width="350">
+			<mx:Label text="Please input your new corpus here:" fontStyle="italic" fontWeight="bold"/>
+			<mx:TextArea id="newCorpus" height="100%" width="100%"/>
+			<mx:Button label="Train Above Corpus, Result in Right Table" click="train()"/>
+		</mx:VBox>
+		
+		<mx:VDividedBox height="100%" width="100%">
+			<mx:HBox>
+				<mx:RadioButton groupName="survey" id="t1" label="show .tword key words" color="0x323232" click="changekeywords()" selected="true"/> 
+				<mx:RadioButton groupName="survey" id="t2" label="show manually selected key words" color="0x323232" click="changekeywords()" />
+			</mx:HBox>
+			<mx:DataGrid dataProvider="{Models.corpusModel.newCorpusTrainResultList}" width="100%" height="300" 
+						 doubleClickEnabled="true" editable="false" itemDoubleClick="loadDocList(event)">
+				<mx:columns>
+					<mx:DataGridColumn headerText="TopicNum" dataField="topicNum" width="80"/>
+					<mx:DataGridColumn headerText="Probability" dataField="probability" width="120"/>			
+					<mx:DataGridColumn id="kw" headerText="Key Words" dataField="topWords" width="550" dataTipField="topWords" showDataTips="true">
+						<!--<mx:itemRenderer>
+							<fx:Component>                      
+								<mx:Text text="{data.topWords}"/>
+							</fx:Component>                        
+						</mx:itemRenderer>-->
+					</mx:DataGridColumn>
+					<mx:DataGridColumn headerText="Topic Summary" dataField="topicSummary" dataTipField="topicSummary" showDataTips="true">
+						<!--<mx:itemRenderer>
+							<fx:Component>                      
+								<mx:Text text="{data.topicSummary}"/>
+							</fx:Component>                        
+						</mx:itemRenderer>-->
+					</mx:DataGridColumn>
+				</mx:columns>
+			</mx:DataGrid>
+			
+			<mx:HBox height="100%" width="100%">
+				
+				<mx:DataGrid dataProvider="{Models.ldaModel.topicCorrespondDocList}" width="300" height="100%" 
+							 doubleClickEnabled="true" itemDoubleClick="loadDoc(event)" editable="false">
+					<mx:columns>
+						<mx:DataGridColumn headerText="DocID" dataField="docNum"/>
+						<mx:DataGridColumn headerText="DocName" dataField="docName"/>
+						<mx:DataGridColumn headerText="Probability" dataField="topicProbabilityForThisDoc"/>
+					</mx:columns>
+				</mx:DataGrid>
+				
+				<mx:TextArea width="100%" height="100%" text="{Models.ldaModel.corpusTransferObject.corpusDocContent}">
+				</mx:TextArea>
+				
+				<mx:Button label="Show Corpus in Thread" click="loadWebPage()"/>
+				
+			</mx:HBox>
+			
+		</mx:VDividedBox>
+		
+		
+	</mx:HBox>
+	
+</mx:Panel>

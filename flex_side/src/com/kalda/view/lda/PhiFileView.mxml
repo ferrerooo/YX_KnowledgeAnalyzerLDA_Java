@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%"
+		   xmlns:view="com.kalda.view.lda.*">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.kalda.command.LDATopicManager.LDATopicManagerControl;
+			import com.kalda.dto.WordInTopic;
+			import com.kalda.model.Models;
+			import com.kalda.util.StringUtils;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			
+			private function loadAPhiLine(event:ListEvent):void {
+				var topicNum:int = event.target.selectedItem.topicNumber;
+				
+				Models.ldaModel.topicNumForPhi = topicNum;
+				
+				LDATopicManagerControl.loadAPhiLine();
+			}
+			
+			private function chooseWords(event:ListEvent):void {
+				var word:String = event.target.selectedItem.word;
+				var list:ArrayCollection = new ArrayCollection();
+				for (var i:int=0;i<Models.ldaModel.aPhiLine.list.length;i++) {
+					
+					if (word == Models.ldaModel.aPhiLine.list.getItemAt(i).word) {
+						list.addItem(Models.ldaModel.aPhiLine.list.getItemAt(i).word);
+						break;
+					} else {
+						list.addItem(Models.ldaModel.aPhiLine.list.getItemAt(i).word);
+					}
+				}
+				var str:String = "";
+				var keyWordAmount:int = 0;
+				for (var j:int=0;j<list.length;j++) {
+					str = str + list.getItemAt(j)+", ";
+					keyWordAmount++;
+				}
+				Models.ldaModel.keyWordsForOneTopic.keyWords = "[manual]"+str.substr(0, str.length-2)+" ("+keyWordAmount+" key words)";		
+			}
+			
+			private function saveKeyWords():void {
+				if (topicLable.text == null ||topicLable.text == "" || topicWordArea.text == null || topicWordArea.text == "") {
+					Alert.show("Some fields are still blank!");
+				} else {
+					Models.ldaModel.keyWordsForOneTopic.topicLable = topicLable.text;
+					LDATopicManagerControl.saveKeyWordsForTopic();
+				}			
+				
+			}
+			
+			private function loadKeyWords():void {
+				LDATopicManagerControl.loadKeyWordsForOneTopic();
+			}
+			
+			private function load():void {
+				var win : PhiFileViewSelectedKeyWordsForTopicWindow = new PhiFileViewSelectedKeyWordsForTopicWindow();
+				PopUpManager.addPopUp(win, Sprite(FlexGlobals.topLevelApplication), true);
+				PopUpManager.centerPopUp(win);
+			}
+			
+			private function calOP():void {
+				var op:Number = StringUtils.StringToNumber(opvalue.text) / 100;
+				var keyWords:String = new String();
+				var cumulatedProbability:Number = 0;
+				for (var i:int=0;i<Models.ldaModel.aPhiLine.list.length;i++) {
+				
+					var wordintopic:WordInTopic = Models.ldaModel.aPhiLine.list.getItemAt(i) as WordInTopic;
+					keyWords = keyWords + wordintopic.word + ", ";
+					cumulatedProbability = cumulatedProbability + wordintopic.wordInTopicProbability;
+					if (cumulatedProbability > op) {
+						keyWords = keyWords.substr(0, keyWords.length-2)+" ("+(i+1)+" key words)";	
+						break;
+					}
+				}
+				Models.ldaModel.keyWordsForOneTopic.keyWords = "[op-"+opvalue.text+"]"+keyWords;
+				oplabel.text = new String(cumulatedProbability);
+			}
+			
+			private function calMD():void {
+				var keyValue:Number = new Number(mdvalue.text);
+				var phiWordProbabilityThreshold:Number = keyValue * Models.ldaModel.aPhiLine.standDeviationValue + Models.ldaModel.aPhiLine.phiLineMeanValue;
+				
+				var keyWords:String = new String();
+				var totalProbability:Number = 0;
+				for (var i:int=0;i<Models.ldaModel.aPhiLine.list.length;i++) {
+					if (Models.ldaModel.aPhiLine.list.getItemAt(i).wordInTopicProbability > phiWordProbabilityThreshold) {
+						keyWords = keyWords + Models.ldaModel.aPhiLine.list.getItemAt(i).word + ", ";
+						totalProbability = totalProbability + Models.ldaModel.aPhiLine.list.getItemAt(i).wordInTopicProbability;
+					} else {
+						keyWords = keyWords.substr(0, keyWords.length-2) + " ("+(i)+" key words)";
+						break;
+					}
+				}
+				Models.ldaModel.keyWordsForOneTopic.keyWords = "[md-"+mdvalue.text+"]"+keyWords;
+				mdlabel.text = "mean-"+Models.ldaModel.aPhiLine.phiLineMeanValue+"\nstdDevi-"+Models.ldaModel.aPhiLine.standDeviationValue
+					+ "\nthreshold-" + StringUtils.NumberToString4she5ru(6, phiWordProbabilityThreshold)+ "\ntotalPro-" + StringUtils.NumberToString4she5ru(6, totalProbability);
+			}
+		]]>
+	</fx:Script>
+	
+	<mx:VBox width="100%" height="100%">
+		
+		<mx:Canvas width="100%" height="100%">
+			
+			<mx:HBox width="100%" height="100%">
+				
+				<mx:DataGrid dataProvider="{Models.ldaModel.twordsDisplayFormat1}" width="100" height="100%" 
+							  doubleClickEnabled="true" editable="false" itemDoubleClick="loadAPhiLine(event)">
+					 <mx:columns>
+						 <mx:DataGridColumn headerText="Topics" dataField="topicNumber" dataTipField="topicnumAndWords" showDataTips="true"/>						 
+					 </mx:columns>
+				 </mx:DataGrid>
+				
+				<mx:DataGrid dataProvider="{Models.ldaModel.aPhiLine.list}" width="250" height="100%" 
+							 doubleClickEnabled="true" editable="false" itemDoubleClick="chooseWords(event)">
+					<mx:columns>
+						<mx:DataGridColumn headerText="Words" dataField="word"/>			
+						<mx:DataGridColumn headerText="Probability" dataField="wordInTopicProbability"/>
+						
+					</mx:columns>
+				</mx:DataGrid>
+				
+				<view:PhiFileViewChartSubView/>
+				
+			</mx:HBox>
+			
+			
+		</mx:Canvas>
+		
+		<mx:HBox width="100%" height="150">
+			
+			<mx:VBox width="100%" height="100%">
+			
+				<mx:TabNavigator id="tddt"  width="100%" height="100%" visible="true">
+		
+				<mx:HBox width="100%" height="100%" label="Manually Choose Topic Words">
+					<mx:Label text="         Key Words:"/>
+					<mx:TextArea id="topicWordArea" text="{Models.ldaModel.keyWordsForOneTopic.keyWords}" width="100%" height="100%" editable="false">
+					</mx:TextArea>
+				</mx:HBox>
+			
+				<mx:Canvas width="100%" height="100%" label="Automatically Choose Topic Words By Mean Deviation">
+					<mx:Label text="         Key Words:"/>
+					<mx:Label text="Dev Key:" x="12" y="19"/>
+					<mx:TextInput id="mdvalue" text="5" width="33" x="65" y="16"/>
+					<mx:Button label="Calculate" x="28" y="39" click="calMD()"/>
+					<mx:TextArea id="topicWordAreaMD" text="{Models.ldaModel.keyWordsForOneTopic.keyWords}" width="971" height="100%" editable="false" x="102">
+					</mx:TextArea>
+					<mx:TextArea id="mdlabel" x="1081" y="0" width="140" height="60" text="mean-{Models.ldaModel.aPhiLine.phiLineMeanValue} stdDevi-{Models.ldaModel.aPhiLine.standDeviationValue}"/>
+				</mx:Canvas>
+				
+				<mx:Canvas width="100%" height="100%" label="Automatically Choose Topic Words By Pie Occupation Percentage">					
+					<mx:Label text="         Key Words:"/>
+					<mx:Label text="Percent:" x="12" y="19"/>
+					<mx:TextInput id="opvalue" text="50" width="33" x="65" y="16"/>
+					<mx:Button label="Calculate" x="28" y="39" click="calOP()"/>
+					<mx:TextArea id="topicWordAreaOP" text="{Models.ldaModel.keyWordsForOneTopic.keyWords}" width="1019" height="100%" editable="false" x="102">
+					</mx:TextArea>
+					<mx:Label id="oplabel" x="1119" y="34" width="71" height="20"/>
+				</mx:Canvas>
+				
+				</mx:TabNavigator>
+				
+				<mx:HBox width="100%">
+					<mx:Label text="Topic Summary:"/><mx:TextInput id="topicLable" text="{Models.ldaModel.keyWordsForOneTopic.topicLable}" width="100%"/>
+				</mx:HBox>
+				<mx:HBox width="100%">
+					<mx:Button label="Load Existing Topic Summary and Topic Words" click="loadKeyWords()"/>
+					<mx:Button label="Save Above Topic Summary and Topic Words" click="saveKeyWords()"/>
+				</mx:HBox>
+			
+			</mx:VBox>
+			
+			<mx:Canvas width="150" height="100%">
+				<mx:Button y="56" label="All Summaries / Words" click="load()" x="0"/>
+			</mx:Canvas>
+			
+	</mx:HBox>
+	
+	</mx:VBox>
+	
+</mx:Canvas>

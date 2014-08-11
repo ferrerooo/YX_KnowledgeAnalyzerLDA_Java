@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%"
+		   xmlns:view="com.kalda.view.lda.*">
+	<!-- Declarations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<!-- Script ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<fx:Script>
+		<![CDATA[
+			
+			
+		]]>
+	</fx:Script>
+	
+	<!-- UI components ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	
+	<mx:Label text="LDA Modeling Parameters" fontSize="12" x="93" y="4" fontWeight="bold"/>
+		
+	<mx:Label id="Alpha" text="Alpha" x="87" y="31"/>	
+	<mx:Label id="Beta" text="Beta" x="93" y="60"/>	
+	<mx:Label id="TC" text="Topic Amount" x="43" y="84"/>	
+	<mx:Label id="SI" text="Sampling Iteration" x="18" y="113"/>	
+	<mx:Label id="sw" text="Stop Word" x="61" y="142"/>	
+	<mx:Label id="st" text="Stemmer" x="67" y="196"/>
+	<mx:Label id="st0" text="Console" x="17" y="252" fontWeight="bold"/>
+	
+	
+	
+	<mx:TextInput id="i2" width="69" x="144" y="29"/>
+	<mx:TextInput id="i0" width="69" x="144" y="83"/>
+	<mx:TextInput id="i1" width="69" x="144" y="56"/>
+	<mx:TextInput id="i3" width="195" x="144" y="139"/>
+	<mx:TextInput id="i4" width="69" x="144" y="111"/>
+	<mx:Label id="sw0" text="Corpus Path" x="49" y="169"/>
+	<mx:TextInput id="i5" width="195" x="144" y="167"/>
+	
+	<mx:RadioButton groupName="thetathreashold" label="Standard" color="0x323232" selected="false"  x="140" y="196"/>
+	<mx:RadioButton groupName="thetathreashold" label="English" color="0x323232" selected="true"  x="257" y="196"/>
+	<mx:Button label="Execute Modeling"  x="165" y="226"/>
+				
+		
+	<mx:TextArea width="678" height="201" x="15" y="277"/>
+
+		
+	
+	
+</mx:Canvas>

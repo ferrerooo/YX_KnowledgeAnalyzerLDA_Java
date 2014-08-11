@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" layout="absolute" width="1200" height="500"
+			    title="Topic -> Document Advanced Search" showCloseButton="true" close="closeWin()" creationComplete="initWin()" >
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	<!-- Script ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<fx:Script>
+		<![CDATA[
+			
+			import com.kalda.command.LDATopicManager.LDATopicManagerControl;
+			import com.kalda.dto.ThetaLine;
+			import com.kalda.dto.ldaanalysis.CorpusTransferObject;
+			import com.kalda.dto.ldaanalysis.TwordsDisplayFormat1Object;
+			import com.kalda.model.Models;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			
+			private function closeWin():void {
+				//Models.ldaAnalysisModel.corpusTransferObject = null;
+				PopUpManager.removePopUp(this);
+			}
+			
+			private function initWin():void {
+//				var ac:ArrayCollection = new ArrayCollection();
+//				for (var i:int=0;i<Models.ldaAnalysisModel.twordsDisplayFormat1.length;i++) {
+//					var tdf:TwordsDisplayFormat1Object = new TwordsDisplayFormat1Object();
+//					tdf.thetaCorpusAmount = Models.ldaAnalysisModel.twordsDisplayFormat1.getItemAt(i).thetaCorpusAmount;
+//					tdf.topicnumAndWords = Models.ldaAnalysisModel.twordsDisplayFormat1.getItemAt(i).topicnumAndWords;
+//					tdf.topicnumAndWordsAndProbability = Models.ldaAnalysisModel.twordsDisplayFormat1.getItemAt(i).topicnumAndWordsAndProbability;
+//					tdf.topicNumber = Models.ldaAnalysisModel.twordsDisplayFormat1.getItemAt(i).topicNumber;
+//					tdf.topicTotalProbability = Models.ldaAnalysisModel.twordsDisplayFormat1.getItemAt(i).topicTotalProbability;
+//					ac.addItem(tdf);
+//				}
+//				searchTopicSourceTable.dataProvider = ac;
+//				
+//				searchTopicTable.dataProvider = null;
+//				info.text = "";
+//				docList.dataProvider = null;
+//				corpusContentInTopicToDocumentTab.text = "";
+			}
+			
+			private function showDoc():void {
+				var ac1:ArrayCollection = searchTopicTable.dataProvider as ArrayCollection; // <TwordsDisplayFormat1Object>
+				var ac11:ArrayCollection = new ArrayCollection(); // <int> for comparasion use
+				for (var n:int=0;n<ac1.length;n++) {
+					ac11.addItem(ac1.getItemAt(n).topicNumber);
+				}
+				var ac2:ArrayCollection = null;
+					//Models.ldaAnalysisModel.thetaThreshold.lineList;  // <ThetaLine>
+				var docs:ArrayCollection = new ArrayCollection(); // <String>
+				var haveAllSelectedTopic:Boolean = true;
+				
+				for (var i:int=0;i<ac2.length;i++) {
+					haveAllSelectedTopic = true;
+					var ll:ThetaLine = ac2.getItemAt(i) as ThetaLine;
+					var acTemp:ArrayCollection = ll.list; // <TopicInDocument>
+					var acTempInt:ArrayCollection = new ArrayCollection(); // <int>  for comparasion use
+					for (var m:int=0;m<acTemp.length;m++) {
+						acTempInt.addItem(acTemp.getItemAt(m).topicNumber);
+					}
+					for (var j:int=0;j<ac11.length;j++) {
+						if (acTempInt.contains(ac11.getItemAt(j)) == false) {
+							haveAllSelectedTopic = false;
+							break;
+						}
+					}
+					if (haveAllSelectedTopic == true) {
+						docs.addItem(ll.corpusDocName);
+					}
+					
+				}
+				docList.dataProvider = docs;
+				info.text = "  " + docs.length + " documents found."
+			}
+			
+//			private function calDocAmount():void {
+//				var ac1:ArrayCollection = searchTopicTable.dataProvider as ArrayCollection;
+//				var ac2:ArrayCollection = searchTopicSourceTable.dataProvider as ArrayCollection;
+//				Alert.show(ac1.length+"! "+ac2.length+"!");
+//			}
+			
+			private function loadDoc(event:ListEvent):void {
+			
+				var ct:CorpusTransferObject = new CorpusTransferObject();
+				ct.corpusDocName = event.target.selectedItem as String;
+				//Models.ldaAnalysisModel.corpusTransferObject = ct;
+				LDATopicManagerControl.loadCorpusDocument();
+				
+			}
+		]]>
+	</fx:Script>	
+	<!-- UI components ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<mx:VBox width="100%" height="100%">
+		
+		<mx:HBox width="100%" height="100%">
+			
+			<mx:VBox width="100%" height="100%">
+			<mx:Label text="Available Topics" color="0x0050AA"/>
+			<mx:DataGrid width="100%" height="100%" editable="false" verticalScrollPolicy="on" 
+					 dragEnabled="true" dragMoveEnabled="true" dropEnabled="true" id="searchTopicSourceTable">
+				<mx:columns>
+				<mx:DataGridColumn headerText="Topics" dataField="topicnumAndWords" dataTipField="topicnumAndWords" showDataTips="true"/>
+				<mx:DataGridColumn headerText="DocNum" dataField="thetaCorpusAmount" width="60"/>
+				</mx:columns>
+			</mx:DataGrid>
+			</mx:VBox>
+		
+			<mx:VBox width="100%" height="100%">
+			<mx:Label text="Selected Topics" color="0x0050AA"/>
+			<mx:DataGrid width="100%" height="100%" editable="false" verticalScrollPolicy="on" 
+					 dragEnabled="true" dragMoveEnabled="true" dropEnabled="true" id="searchTopicTable">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Topics" dataField="topicnumAndWords" dataTipField="topicnumAndWords" showDataTips="true"/>
+				<mx:DataGridColumn headerText="DocNum" dataField="thetaCorpusAmount" width="60"/>
+				</mx:columns>
+			</mx:DataGrid>
+			</mx:VBox>
+				
+		</mx:HBox>
+		
+		<mx:HBox width="100%" height="25">
+			<mx:Button label="Refresh" click="initWin()"/>
+			<mx:Button label="Show Documents" click="showDoc()"/>
+			<mx:Label id="info"/>
+		</mx:HBox>
+		
+		<mx:HBox width="100%" height="100%">
+			
+			<mx:DataGrid id="docList" width="150" height="100%" doubleClickEnabled="true" itemDoubleClick="loadDoc(event)" editable="false">
+				<mx:columns>
+					<mx:DataGridColumn headerText="Document" dataField="corpusDocName"/>
+				</mx:columns>
+			</mx:DataGrid>
+			
+			<mx:TextArea id="corpusContentInTopicToDocumentTab" width="100%" height="100%" text="{}">
+			</mx:TextArea>
+			
+		</mx:HBox>
+
+	</mx:VBox>
+</mx:TitleWindow>

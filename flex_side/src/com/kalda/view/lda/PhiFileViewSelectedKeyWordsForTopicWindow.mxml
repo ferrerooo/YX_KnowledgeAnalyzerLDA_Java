@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" layout="absolute" width="1400" height="600"
+				title="Key Words For Topic" 
+				showCloseButton="true" close="closeWin()" creationComplete="initWin()">
+	
+	<fx:Script>
+		<![CDATA[
+			
+			import com.kalda.command.LDATopicManager.LDATopicManagerControl;
+			import com.kalda.dto.ThetaLine;
+			import com.kalda.dto.ldaanalysis.CorpusTransferObject;
+			import com.kalda.dto.ldaanalysis.TwordsDisplayFormat1Object;
+			import com.kalda.model.Models;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			
+			private function initWin():void {
+				LDATopicManagerControl.loadKeyWordsForTopic();
+			}
+			
+			private function closeWin():void {
+				PopUpManager.removePopUp(this);
+			}
+			
+			
+		
+		]]>
+	</fx:Script>
+
+	
+	<mx:DataGrid dataProvider="{Models.ldaModel.keyWordsForTopicList}" width="100%" height="100%" editable="false">
+		<mx:columns>
+			<mx:DataGridColumn headerText="T_Num" dataField="tn" width="50"/>
+			<mx:DataGridColumn headerText="TopicLable" dataField="topicLable" width="300" dataTipField="keyWords" showDataTips="true"/>
+			<mx:DataGridColumn headerText="Key Words" dataField="keyWords" dataTipField="keyWords" showDataTips="true"/>
+		</mx:columns>
+	</mx:DataGrid>
+	
+</mx:TitleWindow>

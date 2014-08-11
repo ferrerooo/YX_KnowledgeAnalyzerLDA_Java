@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%">
+	<!-- Declarations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<!-- Script ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<fx:Script>
+		<![CDATA[
+			import com.kalda.command.LDATopicManager.LDATopicManagerControl;
+			import com.kalda.dto.TopicInDocument;
+			import com.kalda.dto.ldaanalysis.CorpusTransferObject;
+			import com.kalda.dto.ldaanalysis.ThetaThreshold;
+			import com.kalda.dto.ldaanalysis.TwordsDisplayFormat1Object;
+			import com.kalda.model.Models;
+			import com.kalda.util.StringUtils;
+			import com.kalda.view.TopicDocumentAdSearchWindow;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			
+			private function loadTheta():void {
+				
+				// check if an LDA run is loaded. (rarely situations that any LDA run is not loaded)
+//				if (Models.ldaAnalysisModel.twordsDisplayFormat1.length == 0) {
+//					Alert.show("Please Load an LDA run first !");
+//					return;
+//				}
+//				
+				// clearance screen info
+//				Models.ldaAnalysisModel.loadThetaLabel1 = "";
+//				Models.ldaAnalysisModel.loadThetaLabel2 = "";
+//				Models.ldaAnalysisModel.loadThetaLabel3 = "";
+//				
+				// some other clearance
+//				Models.ldaAnalysisModel.corpusTransferObject = new CorpusTransferObject();
+//				corpusTableInTopicToDocumentTab.dataProvider = null;
+//				corpusContentInTopicToDocumentTab.text = null;
+//				if (topicListTableInDocumentToTopicTab != null) {topicListTableInDocumentToTopicTab.dataProvider = null;}
+//				if (corpusContentInDocumentToTopicTab != null) {corpusContentInDocumentToTopicTab.text = null;}
+//				if (documentListTableInDocumentToTopicTab != null) {
+//					Models.ldaAnalysisModel.allCorpusDocNamesAndTopicAmount = new ArrayCollection();
+//				}
+
+				// create ThetaThreshold object, and transfer it to java side
+				var tt:ThetaThreshold = new ThetaThreshold();
+				//tt.ldaRunDocName = Models.ldaAnalysisModel.ldaRunDocName;
+				tt.total = t1.selected;
+				tt.percentile = t2.selected;
+				if (tt.percentile) {
+					tt.percentNum = StringUtils.StringToNumber(i1.text);
+				}
+				tt.deviation = t3.selected;
+				if (tt.deviation) {
+					tt.kValue = StringUtils.StringToint(i2.text);
+				}
+				
+				//Models.ldaAnalysisModel.thetaThreshold = tt;
+				LDATopicManagerControl.loadThetaWithThreshold();
+				
+				//Models.ldaAnalysisModel.topicToDocNavigatorVisible = true;
+			}
+			
+			private function threadholdselection():void {}
+			
+			private function topicToCorpus(event:ListEvent):void {
+				var topicNum:int = event.target.selectedItem.topicNumber;
+				var topicToDocumentList:ArrayCollection = new ArrayCollection(); // <TopicInDocument.as>
+//				for (var i:int=0;i<Models.ldaAnalysisModel.thetaThreshold.list.length;i++) {
+//					if (topicNum == Models.ldaAnalysisModel.thetaThreshold.list.getItemAt(i).topicNumber) {
+//						topicToDocumentList.addItem(Models.ldaAnalysisModel.thetaThreshold.list.getItemAt(i));
+//					}
+//				}
+				corpusTableInTopicToDocumentTab.dataProvider = topicToDocumentList;
+				
+				corpusContentInTopicToDocumentTab.text = null;
+				ta11.text = "";
+			}
+			
+			private function loadCorpusInTtoC(event:ListEvent):void {
+				var ct:CorpusTransferObject = new CorpusTransferObject();
+				ct.corpusDocName = event.target.selectedItem.corpusDocName;
+				//Models.ldaAnalysisModel.corpusTransferObject = ct;
+				LDATopicManagerControl.loadCorpusDocument();
+				sc.enabled = true;
+			}
+			
+			private function loadCorpusInCtoT(event:ListEvent):void {
+				var ct:CorpusTransferObject = new CorpusTransferObject();
+				ct.corpusDocName = event.target.selectedItem.name as String;
+				//Models.ldaAnalysisModel.corpusTransferObject = ct;
+				LDATopicManagerControl.loadCorpusDocument();
+				
+				// calculate important topics in a corpus
+				var acBind:ArrayCollection = new ArrayCollection();
+				var ac:ArrayCollection = new ArrayCollection();
+				var td:TopicInDocument = new TopicInDocument();
+				//ac = Models.ldaAnalysisModel.thetaThreshold.list;
+				for (var i:int=0; i<ac.length;i++) {
+					td = ac.getItemAt(i) as TopicInDocument;
+					if (td.corpusDocName == ct.corpusDocName) {
+						acBind.addItem(ac.getItemAt(i));
+					}
+				}
+				topicListTableInDocumentToTopicTab.dataProvider = acBind;
+			}
+			
+			private function loadAllCorpusName():void {
+				LDATopicManagerControl.loadAllCorpusDocName();
+			}
+			
+			private function initview():void {
+				//Models.ldaAnalysisModel.corpusTransferObject = null;
+				if (corpusTableInTopicToDocumentTab!=null)corpusTableInTopicToDocumentTab.dataProvider = null;
+				if (corpusContentInTopicToDocumentTab)corpusContentInTopicToDocumentTab.text = null;
+				if (corpusContentInDocumentToTopicTab)corpusContentInDocumentToTopicTab.text = null;
+				if (topicListTableInDocumentToTopicTab)topicListTableInDocumentToTopicTab.dataProvider = null;
+				
+			}
+			
+			private function saveComment():void {
+				//var model:LDAAnalysisModel = Models.ldaAnalysisModel;
+				//Models.ldaAnalysisModel.corpusTransferObject.corpusDocComment = ta11.text;
+				LDATopicManagerControl.saveDocumentComment();
+				sc.enabled = false;
+			}
+			
+			private function openTtoDSearchWindow():void {
+				var tdswindow : TopicDocumentAdSearchWindow = new TopicDocumentAdSearchWindow();
+				PopUpManager.addPopUp(tdswindow, Sprite(FlexGlobals.topLevelApplication), true);
+				PopUpManager.centerPopUp(tdswindow);
+			}
+			
+			private function openThetaHeatMap():void {
+//				var thm:ThetaHeatMapWindow = new ThetaHeatMapWindow();
+//				PopUpManager.addPopUp(thm, Sprite(FlexGlobals.topLevelApplication), true);
+//				PopUpManager.centerPopUp(thm);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<!-- UI components ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	
+	<mx:VBox height="100%" width="100%">
+		<mx:HBox width="100%">
+			<mx:Label text="Choose Theta Matrix Loading Threshold :"/>		
+			<mx:VBox borderVisible="true" dropShadowVisible="true" borderColor="#2F5DC6" fontFamily="Arial" fontStyle="italic">
+				<mx:RadioButton groupName="thetathreashold" id="t1" label="Totally" color="0x323232" click="threadholdselection()" selected="true"/> 
+				<mx:HBox>
+					<mx:RadioButton groupName="thetathreashold" id="t2" label="Percentile" color="0x323232" click="threadholdselection()"/>
+					<mx:HBox id="percent" enabled="true">
+						<mx:Label text="Top"/>
+						<mx:TextInput id="i1" width="30"/>
+						<mx:Label text="%"/>
+					</mx:HBox>
+				</mx:HBox>
+				<mx:HBox>
+					<mx:RadioButton groupName="thetathreashold" id="t3" label="Mean Deviation " color="0x323232" click="threadholdselection()"/>
+					<mx:HBox id="kvalue" enabled="true">
+						<mx:Label text="Key value"/>
+						<mx:TextInput id="i2" width="30"/>	
+					</mx:HBox>
+				</mx:HBox>
+			</mx:VBox>
+			<mx:Button label="Load Theta" click="loadTheta()" />
+			<mx:VBox>
+				<!--<mx:Label fontFamily="Arial" fontStyle="italic" text="{Models.ldaAnalysisModel.loadThetaLabel1}"/>
+				<mx:Label fontFamily="Arial" fontStyle="italic" text="{Models.ldaAnalysisModel.loadThetaLabel2}"/>
+				<mx:Label fontFamily="Arial" fontStyle="italic" text="{Models.ldaAnalysisModel.loadThetaLabel3}"/>
+			--></mx:VBox>
+		</mx:HBox>
+		
+		<mx:TabNavigator id="tddt"  width="100%" height="100%" color="0x323232" visible="true" change="initview()">
+			
+			 <mx:VBox label="Topic -> Document" height="100%" width="100%">
+				 
+				 <mx:HBox height="100%" width="100%">
+				 	<!-- topic related display -->
+				 	<mx:DataGrid dataProvider="{}" width="100%" height="100%" 
+							  doubleClickEnabled="true" itemDoubleClick="topicToCorpus(event)" editable="false">
+					 	<mx:columns>
+						 <mx:DataGridColumn headerText="Topics" dataField="topicnumAndWords"/>
+						 <mx:DataGridColumn headerText="DocNum" dataField="thetaCorpusAmount" width="60"/>
+						 <!--<mx:DataGridColumn headerText="Probability" dataField="topicTotalProbability" width="100"/>-->
+					 	</mx:columns>
+					 </mx:DataGrid>
+					 <mx:VBox>
+					 	<mx:Button label="Advanced Search" click="openTtoDSearchWindow()"/>
+						<mx:Button label="Heat Map" click="openThetaHeatMap()" width="100%"/>
+					 </mx:VBox>
+				 </mx:HBox>
+				 <!-- corpus related display -->
+				 <mx:HBox width="100%" height="100%">
+					 <mx:VBox width="300" height="100%">
+					 	<mx:DataGrid id="corpusTableInTopicToDocumentTab" width="100%" height="100%" doubleClickEnabled="true" itemDoubleClick="loadCorpusInTtoC(event)" editable="false">
+						 <mx:columns>
+							 <mx:DataGridColumn headerText="Document" dataField="corpusDocName" width="150"/>
+							 <mx:DataGridColumn headerText="Topic Probability" dataField="topicInDocumentProbability" width="150"/>
+						 </mx:columns>
+					 	</mx:DataGrid>
+					 </mx:VBox>
+					 <mx:TextArea id="corpusContentInTopicToDocumentTab" width="100%" height="100%" text="{}">
+					 </mx:TextArea>
+					 <mx:VBox width="200" height="100%">
+						 <mx:TextArea id="ta11" width="100%" height="100%" text="{}">
+						 </mx:TextArea>
+						 <mx:Button id="sc" label="Save Comment" click="saveComment()" enabled="false"/>
+					 </mx:VBox>
+				 </mx:HBox>
+				 
+			 </mx:VBox>
+			 
+			 <mx:VBox label="Document -> Topic">
+				 
+				 <!-- corpus related display -->
+				 <mx:HBox width="100%" height="100%">
+					 <mx:VBox width="210" height="100%">
+						 <mx:HBox width="100%">
+						 <mx:Button label="All Docs" click="loadAllCorpusName()"/>
+					     <mx:Label text="Dev:{}"/>
+						 <mx:Label text="Mean:{}"/>
+						 </mx:HBox>
+						 <mx:DataGrid id="documentListTableInDocumentToTopicTab" width="100%" height="100%" doubleClickEnabled="true" itemDoubleClick="loadCorpusInCtoT(event)" editable="false"
+									   dataProvider="{}">
+							 <mx:columns>
+								 <mx:DataGridColumn headerText="Corpus" dataField="name"/>
+								 <mx:DataGridColumn headerText="TopicAmount" dataField="topicAmount"/>
+							 </mx:columns>
+						 </mx:DataGrid>
+					 </mx:VBox>
+					 <mx:TextArea id="corpusContentInDocumentToTopicTab" width="100%" height="100%" text="{}">
+					 </mx:TextArea>
+				 </mx:HBox>
+				 
+				 <!-- topic related display -->
+				 <mx:HBox width="100%" height="100%">
+					<mx:DataGrid id="topicListTableInDocumentToTopicTab" width="200" height="100%" doubleClickEnabled="true" editable="false">
+						 <mx:columns>
+							 <mx:DataGridColumn headerText="Topic Number" dataField="topicNumber" width="100"/>
+							 <mx:DataGridColumn headerText="Probability" dataField="topicInDocumentProbability" width="100"/>
+						 </mx:columns>
+					</mx:DataGrid>
+				 	<mx:DataGrid width="100%" height="100%" editable="false" dataProvider="{}">
+						 <mx:columns>
+							 <mx:DataGridColumn headerText="Topics" dataField="topicnumAndWords"/>
+						 </mx:columns>
+				 	</mx:DataGrid>
+				 </mx:HBox>
+			 </mx:VBox>
+		</mx:TabNavigator>
+			
+	</mx:VBox>
+</mx:Canvas>

@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" layout="absolute" width="1000" height="500"
+				title="Thread" xmlns:webPageView="com.kalda.util.*"
+				showCloseButton="true" close="closeWin()">
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+	<!-- Script ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<fx:Script>
+		<![CDATA[
+			import com.kalda.model.Models;
+			import com.kalda.command.LDATopicManager.LDATopicManagerControl;
+			import com.kalda.dto.ThetaLine;
+			import com.kalda.dto.ldaanalysis.CorpusTransferObject;
+			import com.kalda.dto.ldaanalysis.TwordsDisplayFormat1Object;
+			import com.kalda.model.Models;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.ListEvent;
+			import mx.managers.PopUpManager;
+			
+			private function closeWin():void {
+				PopUpManager.removePopUp(this);
+			}
+		]]>
+	</fx:Script>
+	
+	<mx:VBox height="100%" width="100%">
+		
+		<mx:Label text="Thread URL : {Models.ldaModel.corpusTransferObject.threadurl}"/>
+		
+		<mx:Label text="This is the {Models.ldaModel.corpusTransferObject.replySequence}th reply"/>
+		
+		<mx:Canvas height="100%" width="100%">
+			<webPageView:WebPageFrame source="{Models.ldaModel.corpusTransferObject.threadurl}" height="100%" width="100%"/>
+		</mx:Canvas>
+	</mx:VBox>
+	
+</mx:TitleWindow>

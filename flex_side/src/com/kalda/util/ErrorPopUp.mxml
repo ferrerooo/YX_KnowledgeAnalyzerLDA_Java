@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" width="530" layout="absolute"  height="418" showCloseButton="true" borderStyle="solid" close="onClose()" title="Fatal Exception Caught" xmlns:s="library://ns.adobe.com/flex/spark">
+	<mx:Script>
+		<![CDATA[
+			import mx.rpc.events.FaultEvent;
+		      import com.kalda.util.LogUtils;
+		      import mx.logging.ILogger;
+		      import mx.core.IFlexDisplayObject;
+		      import mx.managers.SystemManager;
+		      //import mx.core.Application;
+			  import mx.core.FlexGlobals;
+		      import mx.managers.PopUpManager;
+		      
+		      private static var logger:ILogger = LogUtils.getLogger("ErrorPopUp");
+		      
+		      [Bindable]
+		      public var errSummary:String;
+		      [Bindable]
+		      public var errTrace:String;
+		      public static function showError(errObj:Object):void{
+		      	  var popup:ErrorPopUp = new ErrorPopUp();
+		      	  var faultEvent:FaultEvent = FaultEvent(errObj);
+		      	  if(faultEvent.fault.rootCause != null){
+		      	  	popup.errSummary = faultEvent.fault.rootCause.message;
+		      	  }
+		      	  popup.errTrace = faultEvent.message.toString();
+		      	  logger.error(popup.errTrace);
+		          //PopUpManager.addPopUp(popup,Sprite(Application.application),true);
+				  PopUpManager.addPopUp(popup,Sprite(FlexGlobals.topLevelApplication),true);
+		          PopUpManager.centerPopUp(popup); 
+		      }
+	        private function onClose():void{
+	        	PopUpManager.removePopUp(this);
+	        }
+
+			
+		]]>
+	</mx:Script>
+   <mx:VDividedBox left="0" right="0" top="0" bottom="0">
+     <mx:Canvas id="abstractCanvas" width = "100%" top="0" height="76">
+	    <mx:Label x="0" y="0" text="Error Summary:" styleName="FormElementTitle"/>
+		<mx:TextArea htmlText="{errSummary}"  left="0" right="0" top="20" bottom="0" editable="false" wordWrap="true" fontWeight="bold" color="#ff0000"/>
+     </mx:Canvas>
+     <mx:Canvas width = "100%" height= "55%" id="detailsCanvas">
+	    <mx:Label text="Error Trace:" styleName="FormElementTitle"/>
+		<mx:TextArea  text="{errTrace}" width="100%" left="0" right="0" top="20" bottom="0" editable="false" wordWrap="true"/>
+     </mx:Canvas>
+   </mx:VDividedBox>
+	
+</mx:TitleWindow>

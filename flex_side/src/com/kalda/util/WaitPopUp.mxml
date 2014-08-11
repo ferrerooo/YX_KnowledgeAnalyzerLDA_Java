@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox 
+  xmlns:mx="http://www.adobe.com/2006/mxml"
+  paddingLeft="10" 
+  paddingRight="10" 
+  paddingBottom="10" 
+  paddingTop="10"
+  initialize="onInit()">
+  
+  <mx:Metadata>
+    [Style(name="labelStyleName", type="String", inherit="no")]
+  </mx:Metadata>
+  
+  <mx:Script>
+    <![CDATA[
+      import com.kalda.util.LogUtils;
+      import mx.logging.ILogger;
+      import mx.core.IFlexDisplayObject;
+      import mx.managers.SystemManager;
+      //import mx.core.Application;
+      import mx.core.FlexGlobals;
+      import mx.managers.PopUpManager;
+      
+      private static var logger:ILogger = LogUtils.getLogger("WaitPopUp");
+      
+      //Message statck
+      private static var messageStack:Array = [];
+      //Instance of Wait Popup window
+      private static var popup:WaitPopUp;
+      
+      [Bindable]
+      public var text:String = "";
+      
+      //Push the waiting message to message stack, if the message stack is empty,
+      //show it directly.
+      public static function show(text:String):void
+      {
+        logger.debug("show: " + text);
+        if (!popup)
+          popup = new WaitPopUp();
+        
+        messageStack.push(text);
+        
+        if (messageStack.length == 1)
+        {
+          popup.text = text;
+          //PopUpManager.addPopUp(popup,Sprite(Application.application),true);   
+		  PopUpManager.addPopUp(popup,Sprite(FlexGlobals.topLevelApplication),true);   
+          PopUpManager.centerPopUp(popup); 
+        } 
+      }
+      
+      private function onInit():void
+      {
+        lbl.styleName = getStyle("labelStyleName");
+      }      
+      /**
+      * Close the WaitPopUp or display the other messages.
+      * 
+      */
+      public static function close():void
+      {
+        logger.debug("close");
+        
+        messageStack.shift();//Remove the first message from queue.
+        
+        if (messageStack.length > 0)
+          popup.text = messageStack[0];
+        else
+          PopUpManager.removePopUp(popup);
+      }
+      //Check if the WaitPopUp is showing
+      public static function isWaiting():Boolean
+      {
+        return messageStack.length > 0;
+      }
+      /*Close the WaitPopUp window and clear message stack
+       *even if there are some messages in message stack.
+       */
+      public static function forceClose():void
+      {
+        logger.debug("force close");
+        messageStack = [];
+        PopUpManager.removePopUp(popup);
+      }
+
+    ]]>
+  </mx:Script>
+  
+  
+  <mx:Image source="@Embed(source='/assets/images/loading.swf')"  />
+  <mx:Label id="lbl" text="{text}" styleName="{getStyle('labelStyleName')}" />
+</mx:HBox>

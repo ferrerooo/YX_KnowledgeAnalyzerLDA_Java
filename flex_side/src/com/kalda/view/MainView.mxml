@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" 
+		   xmlns:view="com.kalda.view.*"
+		   width="100%" height="100%">
+	<!-- Script ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<fx:Script>
+		<![CDATA[			
+		]]>
+	</fx:Script>
+	
+	<!-- Declarations ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+	<fx:Declarations>
+	</fx:Declarations>
+	
+	<!-- UI components ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ -->
+
+	<s:VGroup width="100%" height="100%">
+		<mx:LinkBar horizontalAlign="center" color="0x0050AA" width="100%" fontWeight="bold" dataProvider="{myViewStack}" borderColor="0xACACAC" borderStyle="solid"/>
+	
+		<mx:ViewStack id="myViewStack" borderStyle="solid" width="100%" height="100%" color="0x323232">
+			
+		<!--<s:NavigatorContent id="lm" label="LDA Modeling" backgroundColor="0xDCDCDC" fontWeight="bold">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" />
+			</s:layout>	
+			<view:LDAModelingView/>
+		</s:NavigatorContent>-->
+			
+		<s:NavigatorContent id="ldaAnalysis" label="LDA Result Analysis" backgroundColor="0xDCDCDC" fontWeight="bold">
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" />
+			</s:layout>	
+			<view:LDAAnalysisView/>
+		</s:NavigatorContent>
+		
+		
+		<s:NavigatorContent id="nc" label="New Document Training" backgroundColor="0xDCDCDC" width="100%" height="100%">				
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" />
+			</s:layout>	
+			<view:CorpusView/>
+		</s:NavigatorContent>
+			
+			
+		<s:NavigatorContent id="fyt" label="Forum Mining" backgroundColor="0xDCDCDC" width="100%" height="100%">				
+			<s:layout>
+				<s:VerticalLayout horizontalAlign="center" />
+			</s:layout>	
+			<view:ForumView/>
+		</s:NavigatorContent>
+			
+		
+		</mx:ViewStack>
+		
+	</s:VGroup>
+</mx:Canvas>

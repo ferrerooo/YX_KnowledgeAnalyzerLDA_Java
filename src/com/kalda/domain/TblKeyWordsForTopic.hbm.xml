@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+<class name="com.kalda.domain.TblKeyWordsForTopic" table="TblKeyWordsForTopic">
+<composite-id name="kwtpk" class="com.kalda.domain.TblKeyWordsForTopicPK">  
+            <key-property name="whichCorpus" column="whichCorpus" type="java.lang.String"></key-property>  
+            <key-property name="whichLDARun" column="whichLDARun" type="java.lang.String"></key-property> 
+            <key-property name="topicNum" column="topicNum" type="java.lang.Integer"></key-property>  
+</composite-id>
+<property name="topicLable" type="java.lang.String">
+  <column name="topicLable" />
+</property>
+<property name="keyWords" type="java.lang.String">
+  <column name="keyWords" />
+</property>
+</class>
+</hibernate-mapping>

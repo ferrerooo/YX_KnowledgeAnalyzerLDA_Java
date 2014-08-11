@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Canvas xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		   xmlns:s="library://ns.adobe.com/flex/spark" 
+		   xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%">
+	<fx:Declarations>
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import com.kalda.model.Models;
+			import com.kalda.command.LDATopicManager.LDATopicManagerControl;
+			import mx.controls.Alert;
+			import mx.events.ListEvent;
+			import com.kalda.util.StringUtils;
+			import com.kalda.dto.ldaanalysis.ThetaThreshold;
+			import com.kalda.dto.ldaanalysis.CorpusTransferObject;
+			
+			private function setTopicNum(event:ListEvent):void {
+				var topicNum:int = event.target.selectedItem.topicNumber;
+				topicNumber.text = String(topicNum);
+				Models.ldaModel.topicNum = topicNum;
+			}
+			
+			private function loadTheta():void {
+				var tt:ThetaThreshold = new ThetaThreshold();
+				tt.ldaRunDocName = Models.ldaModel.ldaRunDocName;
+				tt.kValue = StringUtils.StringToint(keyValue.text);
+				Models.ldaModel.thetaThreshold = tt;
+				
+				LDATopicManagerControl.QuantitativeTopicCorrespondDoc();
+			}
+			
+			private function loadDoc(event:ListEvent):void {
+				var ct:CorpusTransferObject = new CorpusTransferObject();
+				ct.corpusDocName = event.target.selectedItem.docName as String;
+				Models.ldaModel.corpusTransferObject = ct;
+				LDATopicManagerControl.loadCorpusDocument();
+			}
+		]]>
+	</fx:Script>
+	<mx:VBox height="100%" width="100%">
+		
+		<mx:DataGrid dataProvider="{Models.ldaModel.twordsDisplayFormat1}" width="100%" height="160" 
+				 doubleClickEnabled="true" itemDoubleClick="setTopicNum(event)" editable="false">
+			<mx:columns>
+				<mx:DataGridColumn headerText="Topics" dataField="topicnumAndWords"/>			
+			</mx:columns>
+		</mx:DataGrid>
+		
+		<mx:HBox width="100%">
+			<mx:Label text="Mean Deviation Calculation -- "/>
+			<mx:Label text="Topic Number:"/>
+			<mx:TextInput id="topicNumber" width="50"/>	
+			<mx:Label text="Key Value:"/>
+			<mx:TextInput id="keyValue" width="50"/>
+			<mx:Text text="" width="100%" height="100%"/>
+		</mx:HBox>
+		<mx:Button label="Load Documents with Threshold" click="loadTheta()"/>
+		<mx:HBox width="100%" height="100%">
+			<mx:DataGrid width="50%" height="100%" dataProvider="{Models.ldaModel.topicCorrespondDocList}"
+						 itemDoubleClick="loadDoc(event)" doubleClickEnabled="true">
+				<mx:columns>
+					<mx:DataGridColumn headerText="DocID" dataField="docNum"/>
+					<mx:DataGridColumn headerText="DocName" dataField="docName"/>
+					<mx:DataGridColumn headerText="Probability" dataField="topicProbabilityForThisDoc"/>		
+				</mx:columns>				
+			</mx:DataGrid>
+			<mx:TextArea width="100%" height="100%" text="{Models.ldaModel.corpusTransferObject.corpusDocContent}"/>
+		</mx:HBox>
+		
+	</mx:VBox>
+</mx:Canvas>

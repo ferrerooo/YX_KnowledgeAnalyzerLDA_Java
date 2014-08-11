@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<cairngorm:ServiceLocator
+	xmlns:mx="http://www.adobe.com/2006/mxml" 
+	xmlns:cairngorm="com.adobe.cairngorm.business.*">
+	<mx:Script>
+		<![CDATA[
+			import mx.messaging.channels.SecureAMFChannel;
+			import mx.messaging.Channel;
+			import mx.messaging.channels.AMFChannel;
+			import mx.messaging.ChannelSet;
+			import mx.rpc.remoting.RemoteObject;
+			import mx.core.Application;
+			import com.kalda.util.HostUtil;
+			import mx.controls.Alert;
+			
+			private static const REQUEST_TIMEOUT_SECONDS:int = 300; // 5 minutes
+			
+			override public function getRemoteObject(name:String):mx.rpc.remoting.RemoteObject{
+				var service:mx.rpc.remoting.RemoteObject = super.getRemoteObject(name);
+				var hostURL:String = HostUtil.getHostURL();
+				//Alert.show(hostURL);
+				var cs:ChannelSet = new ChannelSet();
+				
+				// --- Use non-secure channel if accessed via http, otherwise use secure channel
+				if (hostURL.substring(0,5) == "http:") { 
+					var amfChannel:Channel = new AMFChannel("yxkalda-amf", hostURL+"/messagebroker/amf");
+					cs.addChannel(amfChannel);
+				} else {
+					var secureAmfChannel:Channel = new SecureAMFChannel("yxkalda-secure-amf", hostURL+"/messagebroker/amfsecure");
+					cs.addChannel(secureAmfChannel);
+				}
+					
+				service.channelSet = cs;
+				return service;
+			}
+
+		]]>
+	</mx:Script>
+						
+    <mx:RemoteObject id="LDATopicManagerServices" destination="LDATopicManagerServices"
+    	requestTimeout="{REQUEST_TIMEOUT_SECONDS}"/>
+	<mx:RemoteObject id="CorpusMgrServices" destination="CorpusMgrServices"
+					 requestTimeout="{REQUEST_TIMEOUT_SECONDS}"/>
+	
+	<mx:HTTPService id="kdldaHTTPServices" 
+		showBusyCursor="false" 
+		useProxy="false" 
+		contentType="application/x-www-form-urlencoded" 
+		resultFormat="text">
+	</mx:HTTPService>
+
+</cairngorm:ServiceLocator>
+

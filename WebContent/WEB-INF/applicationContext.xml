@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd">
+
+	<!-- ========================= RESOURCE DEFINITIONS ========================= -->
+
+    <bean id="dataSourceYXKnowledgeAnalyzerLDA" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+        <property name="driverClassName" value="com.mysql.jdbc.Driver" />
+        <property name="url" value="jdbc:mysql://localhost/yx_knowledgeanalyzerlda" />
+        <property name="username" value="root" />
+        <property name="password" value="root" />
+        <property name="maxActive" value="100" />
+        <property name="maxWait" value="2000" />
+        <property name="maxIdle" value="5" />
+        <property name="initialSize" value="3" />
+    </bean>
+
+    <!-- Hibernate SessionFactory  -->
+    <bean id="sessionFactoryYXKnowledgeAnalyzerLDA"
+        class="org.springframework.orm.hibernate3.LocalSessionFactoryBean">
+        <property name="dataSource" ref="dataSourceYXKnowledgeAnalyzerLDA" />
+        <property name="mappingResources">
+            <list>
+                    <value>com/kalda/domain/TblCorpusDocument.hbm.xml</value>
+                    <value>com/kalda/domain/TblThreadJavaRanch.hbm.xml</value>
+                    <value>com/kalda/domain/TblReplyJavaRanch.hbm.xml</value>
+                    <value>com/kalda/domain/TblKeyWordsForTopic.hbm.xml</value>
+                    <value>com/kalda/domain/TblUser.hbm.xml</value>
+                    <value>com/kalda/domain/TblThreadStackoverflow.hbm.xml</value>
+            </list>
+        </property>
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQL5Dialect</prop>
+                <prop key="hibernate.show_sql">false</prop>
+                <prop key="hibernate.cache.use_second_level_cache">false</prop>
+                <prop key="hibernate.cache.use_query_cache">false</prop>
+       			<!-- <prop key="hibernate.cache.provider_class">org.hibernate.cache.EhCacheProvider</prop>  -->
+            </props>
+        </property>
+    </bean>
+    
+    <!-- ========================= DAO DEFINITIONS: Hibernate IMPLEMENTATIONS ========================= -->
+    
+    <bean id="LDATopicManagerDAO" class="com.kalda.dao.LDATopicManagerDAOImpl">
+        <property name="sessionFactory" ref="sessionFactoryYXKnowledgeAnalyzerLDA"/>
+    </bean>
+    <bean id="CorpusMgrDAO" class="com.kalda.dao.CorpusMgrDAOImpl">
+        <property name="sessionFactory" ref="sessionFactoryYXKnowledgeAnalyzerLDA"/>
+    </bean>
+
+    <!-- ========================= BUSINESS OBJECT DEFINITIONS ========================= -->
+    
+    <bean id="LDATopicMgrBO" class="com.kalda.business.LDATopicMgrBOImpl">
+    	<property name="lDATopicManagerDAO" ref="LDATopicManagerDAO" />
+    	<!-- <property name="lDAModelPath" value="C:/Users/Administrator/Desktop/servlet3"/>
+    	<property name="corpusPath" value="C:/Corpus - LDA-servlets"/>
+    	<property name="wordMapPath" value="C:/Users/Administrator/Desktop/servlet3/wordmap.txt"/> -->
+    	<!--
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_anExpertReply"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/corpusfinal_afile_is_anExpertReply"/>
+    	<property name="wordMapPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_anExpertReply/wordmap.txt"/> 
+    	 -->
+    	<!--
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_athread"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/corpusfinal_afile_is_athread"/>
+    	<property name="wordMapPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_athread/wordmap.txt"/> 
+    	 -->
+    	<!--  
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_athread_withoutSourceCode"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/corpusfinal_afile_is_athread_withoutSourceCode"/>
+    	<property name="wordMapPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_athread_withoutSourceCode/wordmap.txt"/> 
+    	--> 
+    	<!--
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_apost_withoutsourcecode"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/corpusfinal_afile_is_apost_withoutsourcecode"/>
+    	<property name="wordMapPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_apost_withoutsourcecode/wordmap.txt"/> 
+    	-->
+    	<!--
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_forToolPaper"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/Corpus_forToolPaper"/>
+    	<property name="wordMapPath" value="C:/Users/Administrator/Desktop/ldaoutput_forToolPaper/wordmap.txt"/> 
+		-->
+		<!--
+		<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_phase2"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_expertpost3000"/>
+    	<property name="wordMapPath" value="C:/Users/Administrator/Desktop/ldaoutput_phase2/wordmap.txt"/> 
+    	-->
+    	<property name="lDAModelPath" value="C:/Users/nancy.quan/Desktop/lda/output/casestudy"/>
+    	<property name="corpusPath" value="C:/Users/nancy.quan/Desktop/lda/corpus/CorpusPostBasedNoCoCde_v2_expertpost3000"/>
+    	<property name="wordMapPath" value="C:/Users/nancy.quan/Desktop/lda/output/casestudy/wordmap.txt"/> 
+    	<!--  
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_apost_withsourcecode"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/corpusfinal_afile_is_apost_withsourcecode"/>
+    	<property name="wordMapPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_apost_withsourcecode/wordmap.txt"/>
+    	-->
+    	<!--
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_Output"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2"/>
+    	<property name="wordMapPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_Output/wordmap.txt"/> 
+    	-->
+    	<!-- 
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_stopword_v2_Output"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2"/>
+    	<property name="wordMapPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_stopword_v2_Output/wordmap.txt"/> 
+    	-->
+    	<!-- 
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_expertpost3000_output"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_expertpost3000"/>
+    	<property name="wordMapPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_expertpost3000_output/wordmap.txt"/> 
+    	 -->
+    	<!-- 
+    	<property name="lDAModelPath" value="C:\\Users\\Administrator\\Desktop\\ldatry\\t3_output"/>
+    	<property name="corpusPath" value="C:\\Users\\Administrator\\Desktop\\ldatry\\corpus_t3"/>
+    	<property name="wordMapPath" value="C:\\Users\\Administrator\\Desktop\\ldatry\\t3_output\\wordmap.txt"/> 
+    	-->
+    </bean>
+    <bean id="CorpusMgrBO" class="com.kalda.business.CorpusMgrBOImpl">
+    	<property name="corpusMgrDAO" ref="CorpusMgrDAO" />
+    	<!--
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_anExpertReply"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/corpusfinal_afile_is_anExpertReply"/>
+    	-->
+    	<!-- 
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_athread"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/corpusfinal_afile_is_athread"/>  -->
+    	<!--
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_apost_withoutsourcecode"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/corpusfinal_afile_is_apost_withoutsourcecode"/> 
+    	-->
+    	<!--
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_afile_is_apost_withsourcecode"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/corpusfinal_afile_is_apost_withsourcecode"/> 
+    	-->
+    	<!--
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_forToolPaper"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/Corpus_forToolPaper"/> 
+		-->
+		<!--
+		<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/ldaoutput_phase2"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_expertpost3000"/>
+    	-->
+    	<property name="lDAModelPath" value="C:/Users/nancy.quan/Desktop/lda/output/casestudy"/>
+    	<property name="corpusPath" value="C:/Users/nancy.quan/Desktop/lda/corpus/CorpusPostBasedNoCoCde_v2_expertpost3000"/> 
+    	<!--
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_Output"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2"/>
+    	-->
+    	<!--
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_stopword_v2_Output"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2"/>
+    	-->
+    	<!--
+    	<property name="lDAModelPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_expertpost3000_output"/>
+    	<property name="corpusPath" value="C:/Users/Administrator/Desktop/CorpusPostBasedNoCoCde_v2_expertpost3000"/>
+    	 -->
+    	<!--
+    	<property name="lDAModelPath" value="C:\\Users\\Administrator\\Desktop\\ldatry\\t3_output"/>
+    	<property name="corpusPath" value="C:\\Users\\Administrator\\Desktop\\ldatry\\corpus_t3"/>
+    	-->
+    </bean>
+    
+    <!-- ========================= TRANSACTION DEFINITIONS ========================= -->
+
+    <bean id="txManager"
+        class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactoryYXKnowledgeAnalyzerLDA" />
+    </bean>
+
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="create*" propagation="REQUIRED"/>
+            <tx:method name="insert*" propagation="REQUIRED"/>
+            <tx:method name="update*" propagation="REQUIRED"/>
+            <tx:method name="delete*" propagation="REQUIRED"/>
+            <tx:method name="save*" propagation="REQUIRED"/>
+            <tx:method name="load*" propagation="REQUIRED"/>
+            <tx:method name="action*" propagation="REQUIRED"/>
+            <tx:method name="*" read-only="true"/>
+        </tx:attributes>
+    </tx:advice>
+
+    <aop:config>
+        <aop:advisor pointcut="execution(* com.kalda.dao.*.*(..))" advice-ref="txAdvice" />
+    </aop:config>
+
+</beans>
